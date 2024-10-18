@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hız ve Ses Ayarlanabilir GIF</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to right, #a0d8ef, #f0f0f0);
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            overflow: hidden;
+        }
+        .container {
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            width: 600px;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+        video {
+            width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border: 5px solid #4CAF50;
+        }
+        #speedControl {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #ddd;
+            border-radius: 5px;
+            outline: none;
+            margin-top: 10px;
+        }
+        #speedControl::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 30px;
+            height: 30px;
+            border: 2px solid #4CAF50;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        #speedControl::-moz-range-thumb {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #4CAF50;
+            border-radius: 50%;
+            background: #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .carrot {
+            position: absolute;
+            top: 230px;
+            left: calc(100% + 20px);
+            width: 60px;
+            height: auto;
+            pointer-events: none;
+            transition: left 0.1s;
+            z-index: 10; /* Havuç z-index değeri artırıldı */
+        }
+        label {
+            font-weight: bold;
+            margin: 10px 0;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <video id="myVideo" loop autoplay muted>
+            <source src="animasyon1.mp4" type="video/mp4">
+        </video>
+
+        <label for="speedControl">Hız ve Ses Ayarı:</label>
+        <input type="range" id="speedControl" min="0.0" max="3" step="0.1" value="3">
+        <img src="2.png" class="carrot" id="carrotImg" alt="Havuç">
+
+        <!-- Ses dosyasını ekleyin -->
+        <audio id="myAudio" loop>
+            <source src="ses.mp3" type="audio/mpeg"> <!-- Ses dosyasının yolu -->
+            Tarayıcınız ses etiketini desteklemiyor.
+        </audio>
+    </div>
+
+    <script>
+        const speedControl = document.getElementById('speedControl');
+        const carrotImg = document.getElementById('carrotImg');
+        const video = document.getElementById('myVideo');
+        const audio = document.getElementById('myAudio');
+
+        // Ses çalmaya başlamak için kullanıcı etkileşimi bekleniyor
+        function startAudio() {
+            audio.play().catch(error => {
+                console.log("Ses çalma hatası:", error);
+            });
+        }
+
+        function setPlaybackSpeedAndVolume() {
+            const speedValue = speedControl.value;
+
+            // Video hızını ayarla
+            if (speedValue == 3) {
+                video.pause();
+            } else {
+                video.playbackRate = 3.2 - speedValue;
+                video.play();
+            }
+
+            // Sesin hızını ve seviyesini ayarla
+            const volume = (3 - speedValue) / 3; // 0.0 (sessiz) ile 1.0 (tam ses) arasında
+            audio.volume = volume; // Ses seviyesini ayarla
+            audio.playbackRate = 0.5 + (2.5 * (3 - speedValue) / 3); // Hız ayarı (0.5 ile 3.0 arasında)
+
+            updateCarrotPosition(); // Havuç konumunu güncelle
+        }
+
+        function updateCarrotPosition() {
+            const value = speedControl.value;
+            const min = speedControl.min;
+            const max = speedControl.max;
+            const range = max - min;
+
+            const percent = (value - min) / range;
+            const sliderWidth = speedControl.clientWidth;
+            carrotImg.style.left = `${percent * sliderWidth + 600}px`;
+
+            // Havuç konumunu kaydırıcının değerine göre ayarlayın
+            const leftOffset = percent < 0.05 ? -150 : 0; // En solda havucu daha fazla sola kaydır
+            carrotImg.style.left = `${parseFloat(carrotImg.style.left) + leftOffset}px`;
+        }
+
+        // Sayfaya tıklandığında ses başlat
+        document.body.addEventListener('click', startAudio);
+
+        updateCarrotPosition();
+        speedControl.addEventListener('input', () => {
+            setPlaybackSpeedAndVolume();
+        });
+
+        // Başlangıçta ses seviyesini ayarla
+        audio.volume = 1; // Başlangıçta ses tam açık
+    </script>
+</body>
+</html>
